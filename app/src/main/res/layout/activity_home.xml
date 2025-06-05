@@ -63,13 +63,22 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
-
             android:gravity="center_vertical|center_horizontal"
             android:layout_width="185dp"
             android:layout_height="80dp"
+            android:layout_gravity="end|center_vertical"
             android:textColor="@color/black"
             android:textSize="25sp"
             android:text="Ameaças Reportadas"
+            android:fontFamily="@font/roboto_mono"/>
+        <TextView
+            android:gravity="center_vertical|center_horizontal"
+            android:layout_width="185dp"
+            android:layout_height="80dp"
+            android:layout_gravity="start|center_vertical"
+            android:textColor="@color/black"
+            android:textSize="40sp"
+            android:text="10"
             android:fontFamily="@font/roboto_mono"/>
     </FrameLayout>
 
@@ -156,7 +165,7 @@
             android:id="@+id/btnSave"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:src="@drawable/ic_home"
+            android:src="@drawable/alert_square_svgrepo_black"
             android:layout_marginStart="20dp"
             android:layout_marginTop="5dp"
             />
@@ -166,7 +175,7 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:src="@drawable/ic_home"
-            android:layout_marginStart="20dp"
+            android:layout_marginStart="116dp"
             android:layout_marginTop="5dp"
             />
 
