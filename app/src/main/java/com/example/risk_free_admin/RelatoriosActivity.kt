@@ -1,6 +1,5 @@
 package com.example.risk_free_admin
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -23,15 +22,15 @@ class RelatoriosActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var progressBar: ProgressBar
     private val db = FirebaseFirestore.getInstance()
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_relatorios)
 
+        // Inicializa a barra de progresso
         progressBar = findViewById(R.id.progressBar)
         progressBar.visibility = View.VISIBLE
 
-        // Obtenha o SupportMapFragment e seja notificado quando o mapa estiver pronto
+        // Obtém o fragmento do mapa
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.mapFragment) as SupportMapFragment
         mapFragment.getMapAsync(this)
@@ -39,72 +38,107 @@ class RelatoriosActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-        mMap.uiSettings.isZoomControlsEnabled = true
 
-        // Carrega os pontos de risco do Firestore
-        carregarPontosDeRisco()
+        // Configurações do mapa
+        mMap.uiSettings.apply {
+            isZoomControlsEnabled = true
+            isMapToolbarEnabled = true
+            isCompassEnabled = true
+        }
+
+        // Carrega as ameaças do Firestore
+        carregarAmeacasDoFirestore()
     }
 
-    private fun carregarPontosDeRisco() {
-        db.collection("pontos_de_risco")
+    private fun carregarAmeacasDoFirestore() {
+        db.collection("ameaca")
             .get()
             .addOnSuccessListener { documents ->
+                if (documents.isEmpty) {
+                    Toast.makeText(this, "Nenhuma ameaça encontrada.", Toast.LENGTH_SHORT).show()
+                    progressBar.visibility = View.GONE
+                    return@addOnSuccessListener
+                }
+
                 val boundsBuilder = LatLngBounds.builder()
+                var marcadoresAdicionados = 0
 
                 for (document in documents) {
                     try {
-                        val geoPoint = document.getGeoPoint("localizacao") ?: continue
-                        val latLng = LatLng(geoPoint.latitude, geoPoint.longitude)
-                        val titulo = document.getString("tipo_risco") ?: "Ponto de Risco"
-                        val descricao = document.getString("descricao") ?: ""
+                        // Extrai os dados do documento
+                        val localizacaoMap = document.get("localizacao") as? Map<*, *>
+                        val latitude = localizacaoMap?.get("latitude") as? Double
+                        val longitude = localizacaoMap?.get("longitude") as? Double
 
-                        // Adiciona marcador no mapa
+                        if (latitude == null || longitude == null) {
+                            Log.d("RelatoriosActivity", "Documento sem coordenadas válidas: ${document.id}")
+                            continue
+                        }
+
+                        val latLng = LatLng(latitude, longitude)
+                        val descricao = document.getString("descricao") ?: ""
+                        val data = document.getString("data") ?: ""
+                        val nivel = document.getString("nivel") ?: "0"
+
+                        // Cria o texto para o marcador
+                        val titulo = "Ameaça Nível $nivel"
+                        val snippet = """
+                            ${descricao.take(30)}${if (descricao.length > 30) "..." else ""}
+                            Data: $data
+                        """.trimIndent()
+
+                        // Adiciona o marcador no mapa
                         mMap.addMarker(
                             MarkerOptions()
                                 .position(latLng)
                                 .title(titulo)
-                                .snippet(descricao)
-                        )
+                                .snippet(snippet)
+                        )?.tag = document.id
 
                         boundsBuilder.include(latLng)
+                        marcadoresAdicionados++
                     } catch (e: Exception) {
                         Log.e("RelatoriosActivity", "Erro ao processar documento ${document.id}", e)
                     }
                 }
 
-                // Ajusta a visualização para mostrar todos os marcadores
-                try {
-                    val bounds = boundsBuilder.build()
-                    mMap.animateCamera(
-                        CameraUpdateFactory.newLatLngBounds(
-                            bounds,
-                            100,  // padding
-                            resources.displayMetrics.widthPixels,
-                            resources.displayMetrics.heightPixels,
-                            50   // offset
-                        )
-                    )
-                } catch (e: Exception) {
-                    Log.e("RelatoriosActivity", "Nenhum ponto para mostrar", e)
-                    Toast.makeText(this, "Nenhum ponto de risco encontrado", Toast.LENGTH_SHORT).show()
+                // Ajusta a visualização do mapa
+                if (marcadoresAdicionados > 0) {
+                    try {
+                        val bounds = boundsBuilder.build()
+                        if (marcadoresAdicionados == 1) {
+                            // Se houver apenas um marcador, usa zoom
+                            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(bounds.center, 14f))
+                        } else {
+                            // Para múltiplos marcadores, ajusta a visualização
+                            mMap.animateCamera(
+                                CameraUpdateFactory.newLatLngBounds(
+                                    bounds,
+                                    resources.displayMetrics.widthPixels,
+                                    resources.displayMetrics.heightPixels,
+                                    100
+                                )
+                            )
+                        }
+                    } catch (e: Exception) {
+                        Log.e("RelatoriosActivity", "Erro ao ajustar câmera", e)
+                    }
+                } else {
+                    Toast.makeText(this, "Nenhuma ameaça com localização válida", Toast.LENGTH_SHORT).show()
                 }
 
                 progressBar.visibility = View.GONE
             }
             .addOnFailureListener { exception ->
-                Log.w("RelatoriosActivity", "Erro ao carregar pontos", exception)
-                Toast.makeText(this, "Falha ao carregar pontos de risco", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Erro ao carregar ameaças: ${exception.message}", Toast.LENGTH_SHORT).show()
                 progressBar.visibility = View.GONE
+                Log.e("RelatoriosActivity", "Erro ao carregar ameaças", exception)
             }
-    }
 
-    companion object {
-        // Classe de modelo para os pontos de risco
-        data class PontoRisco(
-            val tipo_risco: String = "",
-            val descricao: String = "",
-            val localizacao: GeoPoint = GeoPoint(0.0, 0.0),
-            val data_registro: String = ""
-        )
+        // Configura o clique nos marcadores
+        mMap.setOnMarkerClickListener { marker ->
+            Toast.makeText(this, marker.title, Toast.LENGTH_SHORT).show()
+            true
+        }
     }
 }
