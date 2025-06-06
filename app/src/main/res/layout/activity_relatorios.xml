@@ -40,6 +40,19 @@
         tools:layout_editor_absoluteX="41dp"
         tools:layout_editor_absoluteY="114dp" />
 
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="0dp"
+        android:layout_height="3dp"
+        android:layout_gravity="center"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+
     <FrameLayout
         android:layout_width="272dp"
         android:layout_height="51dp"
