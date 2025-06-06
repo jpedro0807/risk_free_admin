@@ -54,15 +54,17 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="30dp"
         android:textSize="20dp"/>
+
     <ImageButton
-    android:layout_width="124dp"
-    android:layout_height="108dp"
-    android:src="@drawable/csv_svgrepo"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintHorizontal_bias="0.498"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/editTextExportCsv"
-    android:layout_marginTop="16dp" />
+        android:id="@+id/btnExportCsv"
+        android:layout_width="124dp"
+        android:layout_height="108dp"
+        android:src="@drawable/csv_svgrepo"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/editTextExportCsv"
+        android:layout_marginTop="16dp" />
 
     <ProgressBar
         android:id="@+id/progressBar"

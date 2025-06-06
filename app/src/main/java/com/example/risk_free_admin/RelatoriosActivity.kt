@@ -1,10 +1,8 @@
 package com.example.risk_free_admin
 
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.widget.ImageButton
 import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -29,19 +27,6 @@ class RelatoriosActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_relatorios)
-
-        val arrow_back: ImageButton = findViewById(R.id.arrow_back)
-        val btnVisualizarAmeacas: ImageButton = findViewById(R.id.btnVisualizarAmeacas)
-        val btnNavHome: ImageButton = findViewById(R.id.btnNavHome)
-        val navegarPraReport = {
-            startActivity(Intent(this, VerificarAmeacaActivity::class.java))
-        }
-        val navegarPraHome = {
-            startActivity(Intent(this, HomeActivity::class.java))
-        }
-        btnVisualizarAmeacas.setOnClickListener { navegarPraReport() }
-        btnNavHome.setOnClickListener{navegarPraHome()}
-        arrow_back.setOnClickListener{navegarPraHome()}
 
         mapView = findViewById(R.id.mapView)
         progressBar = findViewById(R.id.progressBar)
