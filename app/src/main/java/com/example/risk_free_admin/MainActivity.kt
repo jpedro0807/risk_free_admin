@@ -32,20 +32,27 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private val adminEmails = listOf("admin@email.com")
+
     private fun loginEmailSenha(email: String, password: String) {
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
                     val user = auth.currentUser
-                    Toast.makeText(this, "Bem-vindo, ${user?.email}", Toast.LENGTH_SHORT).show()
-                    val intent = Intent(this, HomeActivity::class.java)
-                    startActivity(intent)
-                    finish()
+                    if (user?.email in adminEmails) {
+                        Toast.makeText(this, "Bem-vindo, ${user?.email}", Toast.LENGTH_SHORT).show()
+                        startActivity(Intent(this, HomeActivity::class.java))
+                        finish()
+                    } else {
+                        Toast.makeText(this, "Acesso negado: você não é administrador.", Toast.LENGTH_LONG).show()
+                        auth.signOut()
+                    }
                 } else {
                     Toast.makeText(this, "Erro: ${task.exception?.message}", Toast.LENGTH_LONG).show()
                 }
             }
     }
+
 
     private fun logout() {
         auth.signOut()
