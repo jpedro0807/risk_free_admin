@@ -32,25 +32,14 @@
             android:src="@drawable/ic_arrow_back"
             android:layout_gravity="center_vertical"/>
     </FrameLayout>
-    <fragment
-        android:id="@+id/mapFragment"
-        android:name="com.google.android.gms.maps.SupportMapFragment"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
-    <ProgressBar
-        android:id="@+id/progressBar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    <com.google.android.gms.maps.MapView
+        android:id="@+id/mapView"
+        android:layout_width="329dp"
+        android:layout_height="155dp"
+        tools:layout_editor_absoluteX="41dp"
+        tools:layout_editor_absoluteY="114dp" />
+
     <FrameLayout
         android:layout_width="272dp"
         android:layout_height="51dp"
@@ -89,4 +78,6 @@
 
 
     </FrameLayout>
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>

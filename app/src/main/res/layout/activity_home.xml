@@ -122,7 +122,7 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <Button
-            android:id="@+id/btnAmeacasReportadas"
+            android:id="@+id/btnRelatorios"
             android:layout_width="285dp"
             android:layout_height="80dp"
             android:layout_marginStart="32dp"
@@ -163,7 +163,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageButton
-            android:id="@+id/btnSave"
+            android:id="@+id/btnNavVerificarAmeacas"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:src="@drawable/alert_square_svgrepo_black"
@@ -181,7 +181,7 @@
             />
 
         <ImageButton
-            android:id="@+id/btnExportRelatorio"
+            android:id="@+id/btnNavExportRelatorio"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:src="@drawable/database"
