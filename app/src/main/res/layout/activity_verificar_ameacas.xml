@@ -33,6 +33,28 @@
             android:layout_gravity="center_vertical"/>
     </FrameLayout>
 
+    <ScrollView
+        android:id="@+id/scrollViewAmeacas"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintTop_toBottomOf="@id/toolbarAmeacasReportadas"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- Container para as ameaças -->
+        <LinearLayout
+            android:id="@+id/linearLayoutAmeacas"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:divider="?android:attr/listDivider"
+            android:showDividers="middle"/>
+
+    </ScrollView>
+
 
     <FrameLayout
         android:layout_width="272dp"
@@ -44,7 +66,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageButton
-            android:id="@+id/btnSave"
+            android:id="@+id/btnNavVerificarAmeacas"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:src="@drawable/alert_square_svgrepo_black"
@@ -53,7 +75,7 @@
             />
 
         <ImageButton
-            android:id="@+id/btnHome"
+            android:id="@+id/btnNavHome"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:src="@drawable/ic_home"
