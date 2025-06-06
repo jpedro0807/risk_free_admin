@@ -8,7 +8,6 @@
     android:backgroundTint="@color/cinzaClaro"
     tools:context=".RelatoriosActivity">
 
-    <!-- Toolbar -->
     <FrameLayout
         android:id="@+id/toolbarAmeacasReportadas"
         android:layout_width="0dp"
@@ -35,7 +34,6 @@
             android:layout_gravity="center_vertical" />
     </FrameLayout>
 
-    <!-- MapView com constraints reais -->
     <com.google.android.gms.maps.MapView
         android:id="@+id/mapView"
         android:layout_width="match_parent"
@@ -45,8 +43,27 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
+    <TextView
+        android:id="@+id/editTextExportCsv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/roboto_mono"
+        android:text="Exportar relatório CSV"
+        app:layout_constraintTop_toBottomOf="@id/mapView"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="30dp"
+        android:textSize="20dp"/>
+    <ImageButton
+    android:layout_width="124dp"
+    android:layout_height="108dp"
+    android:src="@drawable/csv_svgrepo"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintHorizontal_bias="0.498"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/editTextExportCsv"
+    android:layout_marginTop="16dp" />
 
-    <!-- Barra de progresso -->
     <ProgressBar
         android:id="@+id/progressBar"
         android:layout_width="0dp"
@@ -57,7 +74,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginBottom="8dp"/>
 
-    <!-- Rodapé com botões -->
     <FrameLayout
         android:id="@+id/btnFooter"
         android:layout_width="0dp"
