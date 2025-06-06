@@ -1,21 +1,21 @@
 package com.example.risk_free_admin
 
+import android.content.ContentValues
 import android.os.Bundle
+import android.provider.MediaStore
 import android.util.Log
 import android.view.View
+import android.widget.ImageButton
 import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.MapView
-import com.google.android.gms.maps.OnMapReadyCallback
-import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.GeoPoint
 
 class RelatoriosActivity : AppCompatActivity() {
 
@@ -30,6 +30,11 @@ class RelatoriosActivity : AppCompatActivity() {
 
         mapView = findViewById(R.id.mapView)
         progressBar = findViewById(R.id.progressBar)
+
+        val btnExportar: ImageButton = findViewById(R.id.btnExportCsv)
+        btnExportar.setOnClickListener {
+            exportarCSV()
+        }
 
         progressBar.visibility = View.VISIBLE
 
@@ -117,7 +122,56 @@ class RelatoriosActivity : AppCompatActivity() {
             }
     }
 
-    // Ciclo de vida do MapView
+    private fun exportarCSV() {
+        db.collection("ameaca")
+            .get()
+            .addOnSuccessListener { documents ->
+                val csvBuilder = StringBuilder()
+                csvBuilder.append("ID,Descrição,Nível,Data,Latitude,Longitude\n")
+
+                for (document in documents) {
+                    val id = document.id
+                    val descricao = document.getString("descricao") ?: ""
+                    val nivel = document.getString("nivel") ?: ""
+                    val data = document.getString("data") ?: ""
+
+                    val localizacao = document.get("localizacao") as? Map<*, *>
+                    val latitude = localizacao?.get("latitude")?.toString() ?: ""
+                    val longitude = localizacao?.get("longitude")?.toString() ?: ""
+
+                    csvBuilder.append("$id,\"$descricao\",$nivel,$data,$latitude,$longitude\n")
+                }
+
+                salvarCSV(csvBuilder.toString())
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(this, "Erro ao gerar relatório: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+    }
+
+    private fun salvarCSV(conteudo: String) {
+        val fileName = "relatorio_ameacas.csv"
+        val mimeType = "text/csv"
+
+        val resolver = contentResolver
+        val contentValues = ContentValues().apply {
+            put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+            put(MediaStore.MediaColumns.MIME_TYPE, mimeType)
+            put(MediaStore.MediaColumns.RELATIVE_PATH, "Download/")
+        }
+
+        val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
+
+        uri?.let {
+            resolver.openOutputStream(it)?.use { outputStream ->
+                outputStream.write(conteudo.toByteArray())
+                Toast.makeText(this, "Relatório salvo na pasta Download", Toast.LENGTH_LONG).show()
+            }
+        } ?: run {
+            Toast.makeText(this, "Erro ao salvar o arquivo", Toast.LENGTH_LONG).show()
+        }
+    }
+
     override fun onResume() {
         super.onResume()
         mapView.onResume()
