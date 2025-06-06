@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.MapView
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
@@ -16,9 +17,10 @@ import com.google.android.gms.maps.model.MarkerOptions
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
 
-class RelatoriosActivity : AppCompatActivity(), OnMapReadyCallback {
+class RelatoriosActivity : AppCompatActivity() {
 
-    private lateinit var mMap: GoogleMap
+    private lateinit var mapView: MapView
+    private lateinit var googleMap: GoogleMap
     private lateinit var progressBar: ProgressBar
     private val db = FirebaseFirestore.getInstance()
 
@@ -26,92 +28,72 @@ class RelatoriosActivity : AppCompatActivity(), OnMapReadyCallback {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_relatorios)
 
-        // Inicializa a barra de progresso
+        mapView = findViewById(R.id.mapView)
         progressBar = findViewById(R.id.progressBar)
+
         progressBar.visibility = View.VISIBLE
 
-        // Obtém o fragmento do mapa
-        //val mapFragment = supportFragmentManager
-          //  .findFragmentById(R.id.mapFragment) as SupportMapFragment
-        //mapFragment.getMapAsync(this)
+        mapView.onCreate(savedInstanceState)
+        mapView.getMapAsync { map ->
+            googleMap = map
+            configurarMapa()
+            carregarAmeacasDoFirestore()
+        }
     }
 
-    override fun onMapReady(googleMap: GoogleMap) {
-        mMap = googleMap
-
-        // Configurações do mapa
-        mMap.uiSettings.apply {
+    private fun configurarMapa() {
+        googleMap.uiSettings.apply {
             isZoomControlsEnabled = true
             isMapToolbarEnabled = true
             isCompassEnabled = true
         }
 
-        // Carrega as ameaças do Firestore
-        carregarAmeacasDoFirestore()
+        googleMap.setOnMarkerClickListener { marker ->
+            Toast.makeText(this, marker.title, Toast.LENGTH_SHORT).show()
+            true
+        }
     }
 
     private fun carregarAmeacasDoFirestore() {
         db.collection("ameaca")
             .get()
             .addOnSuccessListener { documents ->
-                if (documents.isEmpty) {
-                    Toast.makeText(this, "Nenhuma ameaça encontrada.", Toast.LENGTH_SHORT).show()
-                    progressBar.visibility = View.GONE
-                    return@addOnSuccessListener
-                }
-
                 val boundsBuilder = LatLngBounds.builder()
                 var marcadoresAdicionados = 0
 
                 for (document in documents) {
-                    try {
-                        // Extrai os dados do documento
-                        val localizacaoMap = document.get("localizacao") as? Map<*, *>
-                        val latitude = localizacaoMap?.get("latitude") as? Double
-                        val longitude = localizacaoMap?.get("longitude") as? Double
+                    val localizacaoMap = document.get("localizacao") as? Map<*, *>
+                    val latitude = localizacaoMap?.get("latitude") as? Double
+                    val longitude = localizacaoMap?.get("longitude") as? Double
 
-                        if (latitude == null || longitude == null) {
-                            Log.d("RelatoriosActivity", "Documento sem coordenadas válidas: ${document.id}")
-                            continue
-                        }
-
+                    if (latitude != null && longitude != null) {
                         val latLng = LatLng(latitude, longitude)
                         val descricao = document.getString("descricao") ?: ""
                         val data = document.getString("data") ?: ""
                         val nivel = document.getString("nivel") ?: "0"
 
-                        // Cria o texto para o marcador
                         val titulo = "Ameaça Nível $nivel"
                         val snippet = """
                             ${descricao.take(30)}${if (descricao.length > 30) "..." else ""}
                             Data: $data
                         """.trimIndent()
 
-                        // Adiciona o marcador no mapa
-                        mMap.addMarker(
-                            MarkerOptions()
-                                .position(latLng)
-                                .title(titulo)
-                                .snippet(snippet)
+                        googleMap.addMarker(
+                            MarkerOptions().position(latLng).title(titulo).snippet(snippet)
                         )?.tag = document.id
 
                         boundsBuilder.include(latLng)
                         marcadoresAdicionados++
-                    } catch (e: Exception) {
-                        Log.e("RelatoriosActivity", "Erro ao processar documento ${document.id}", e)
                     }
                 }
 
-                // Ajusta a visualização do mapa
                 if (marcadoresAdicionados > 0) {
                     try {
                         val bounds = boundsBuilder.build()
                         if (marcadoresAdicionados == 1) {
-                            // Se houver apenas um marcador, usa zoom
-                            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(bounds.center, 14f))
+                            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(bounds.center, 14f))
                         } else {
-                            // Para múltiplos marcadores, ajusta a visualização
-                            mMap.animateCamera(
+                            googleMap.animateCamera(
                                 CameraUpdateFactory.newLatLngBounds(
                                     bounds,
                                     resources.displayMetrics.widthPixels,
@@ -124,7 +106,7 @@ class RelatoriosActivity : AppCompatActivity(), OnMapReadyCallback {
                         Log.e("RelatoriosActivity", "Erro ao ajustar câmera", e)
                     }
                 } else {
-                    Toast.makeText(this, "Nenhuma ameaça com localização válida", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Nenhuma ameaça encontrada com localização válida", Toast.LENGTH_SHORT).show()
                 }
 
                 progressBar.visibility = View.GONE
@@ -132,13 +114,32 @@ class RelatoriosActivity : AppCompatActivity(), OnMapReadyCallback {
             .addOnFailureListener { exception ->
                 Toast.makeText(this, "Erro ao carregar ameaças: ${exception.message}", Toast.LENGTH_SHORT).show()
                 progressBar.visibility = View.GONE
-                Log.e("RelatoriosActivity", "Erro ao carregar ameaças", exception)
             }
+    }
 
-        // Configura o clique nos marcadores
-        mMap.setOnMarkerClickListener { marker ->
-            Toast.makeText(this, marker.title, Toast.LENGTH_SHORT).show()
-            true
-        }
+    // Ciclo de vida do MapView
+    override fun onResume() {
+        super.onResume()
+        mapView.onResume()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        mapView.onPause()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mapView.onDestroy()
+    }
+
+    override fun onLowMemory() {
+        super.onLowMemory()
+        mapView.onLowMemory()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
     }
 }
