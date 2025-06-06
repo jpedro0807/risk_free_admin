@@ -31,9 +31,9 @@ class RelatoriosActivity : AppCompatActivity(), OnMapReadyCallback {
         progressBar.visibility = View.VISIBLE
 
         // Obtém o fragmento do mapa
-        val mapFragment = supportFragmentManager
-            .findFragmentById(R.id.mapFragment) as SupportMapFragment
-        mapFragment.getMapAsync(this)
+        //val mapFragment = supportFragmentManager
+          //  .findFragmentById(R.id.mapFragment) as SupportMapFragment
+        //mapFragment.getMapAsync(this)
     }
 
     override fun onMapReady(googleMap: GoogleMap) {

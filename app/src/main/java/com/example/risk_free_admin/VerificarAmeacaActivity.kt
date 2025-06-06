@@ -23,6 +23,7 @@ class VerificarAmeacaActivity: AppCompatActivity() {
         linearLayoutAmeacas = findViewById(R.id.linearLayoutAmeacas)
 
         // 2) botão para adicionar nova ameaça
+        val arrow_back: ImageButton = findViewById(R.id.arrow_back)
         val btnExportRelatorio: ImageButton = findViewById(R.id.btnExportRelatorio)
         val btnNavHome: ImageButton = findViewById(R.id.btnNavHome)
         val navegarPraReport = {
@@ -33,6 +34,7 @@ class VerificarAmeacaActivity: AppCompatActivity() {
         }
         btnExportRelatorio.setOnClickListener { navegarPraReport() }
         btnNavHome.setOnClickListener{navegarPraHome()}
+        arrow_back.setOnClickListener{navegarPraHome()}
 
         // 3) busca e exibe as ameaças já reportadas
         fetchAmeacas()
